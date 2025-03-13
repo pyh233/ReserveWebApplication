@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.psychroomserver.dao.GroupDao">
+    <cache type="org.mybatis.caches.redis.RedisCache">
+        <property name="timeout" value="3600"/>
+    </cache>
+    <sql id="Columns">
+        select id,
+               name
+        from admin_group
+    </sql>
+    <resultMap id="GroupMap" type="Group">
+        <id column="id" property="id"/>
+        <collection column="id" property="roleList" select="com.example.psychroomserver.dao.RoleDao.findRoleByGroupId"/>
+    </resultMap>
+    <select id="findByAdminId" resultMap="GroupMap" useCache="true">
+        <include refid="Columns"></include>
+        where id in (select group_id from admin_admin_group where admin_id=#{adminId})
+    </select>
+</mapper>
