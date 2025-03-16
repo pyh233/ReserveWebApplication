@@ -27,7 +27,7 @@ public class RouteApi {
                                               @RequestParam(defaultValue = "10") Integer limit,
                                               RouteSearchModel routeSearchModel) {
         Page<?> p = new Page<>(page, limit);
-        List<Route> routeList = routeService.getRoutes(routeSearchModel, p);
+        List<Route> routeList = routeService.findAllRoutes(routeSearchModel, p);
         PageInfo pi = new PageInfo(routeList);
         if (!routeList.isEmpty()) {
             JsonResult jr = JsonResult.success("查询成功", routeList);

@@ -16,5 +16,9 @@ public interface RouteDao {
     int addRoute(Route route);
     int updateRoute(Route route);
 
+    /**
+     * 前端列表使用
+     * @return
+     */
     List<Route> findAll();
 }

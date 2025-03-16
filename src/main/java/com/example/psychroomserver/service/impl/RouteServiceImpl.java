@@ -21,7 +21,7 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public List<Route> getRoutes(RouteSearchModel routeSearchModel, Page<?> page) {
+    public List<Route> findAllRoutes(RouteSearchModel routeSearchModel, Page<?> page) {
         try (Page<?> __ = PageHelper.startPage(page.getPageNum(), page.getPageSize())) {
             return routeDao.findAllRoutes(routeSearchModel);
         }
@@ -45,6 +45,10 @@ public class RouteServiceImpl implements RouteService {
         return routeDao.updateRoute(route) > 0;
     }
 
+    /**
+     * 前端列表使用
+     * @return
+     */
     @Override
     public List<Route> getAllRoutes() {
         return routeDao.findAll();

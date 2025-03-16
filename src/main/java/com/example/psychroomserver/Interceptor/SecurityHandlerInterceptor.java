@@ -28,6 +28,20 @@ public class SecurityHandlerInterceptor implements HandlerInterceptor {
         this.permissionService = permissionService;
     }
 
+    /**
+     * STEP1:检查登录状态
+     * STEP2:获取请求路径和方法
+     * STEP3:获取权限资源映射
+     * STEP4:与所有Route对象的Url进行对比
+     * STEP5:若不匹配比对下一个Route，
+     * STEP6:若匹配取出当前Route对应的所有可以访问的权限，权限与用户权限进行比对
+     *
+     * @param request
+     * @param response
+     * @param handler
+     * @return
+     * @throws Exception
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         StpUtil.checkLogin();//NOTE:检查权限前先登陆状态，未登录抛出异常由异常处理结构返回未登录错误
@@ -67,18 +81,18 @@ public class SecurityHandlerInterceptor implements HandlerInterceptor {
     private Map<Route, Set<Permission>> findAllRoute2Permission() {
         List<Permission> permissions = permissionService.findAll();// 查询的一对多数据
         // 新建一个要返回的数据
-        Map<Route,Set<Permission>> routeMap = new HashMap<Route,Set<Permission>>();
+        Map<Route, Set<Permission>> routeMap = new HashMap<Route, Set<Permission>>();
         // 遍历所有权限中的所有route
-        for(Permission permission : permissions) {
+        for (Permission permission : permissions) {
             List<Route> routes = permission.getRouteList();
-            if(!routes.isEmpty()){
+            if (!routes.isEmpty()) {
                 // 遍历所有的route，根据route获取map中的所有权限
-                for(Route route : routes) {
+                for (Route route : routes) {
                     Set<Permission> set = routeMap.get(route);
                     // 如果是首次首次访问权限set，那么set为空，放入一个新建的set
-                    if(set == null){
+                    if (set == null) {
                         set = new HashSet<Permission>();
-                        routeMap.put(route,set);
+                        routeMap.put(route, set);
                     }
                     // 不是第一次访问就添加此权限
                     set.add(permission);

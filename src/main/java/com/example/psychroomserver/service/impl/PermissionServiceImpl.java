@@ -8,6 +8,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public List<Permission> getPermissions(PermissionSearchModel permissionSearchModel, Page<?> page) {
+    public List<Permission> findAllPermissions(PermissionSearchModel permissionSearchModel, Page<?> page) {
         try (Page<?> __ = PageHelper.startPage(page.getPageNum(), page.getPageSize())) {
             return permissionDao.findAllPermissions(permissionSearchModel);
         }
@@ -44,8 +45,38 @@ public class PermissionServiceImpl implements PermissionService {
         return permissionDao.deletePermissionByIds(ids);
     }
 
+    /**
+     * 只是创建权限，添加资源在修改中添加
+     *
+     * @param permission
+     * @return
+     */
     @Override
     public boolean addPermission(Permission permission) {
         return permissionDao.addPermission(permission) > 0;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean renewRoutes4Permission(Integer pid, Integer[] rids) {
+        //1.delete
+        permissionDao.deleteAllRoute4Permission(pid);
+        //2.add
+        for (Integer rid : rids) {
+            permissionDao.addLatestRoute4Permission(pid, rid);
+        }
+        //3.todo:flush cache
+        return true;
+    }
+
+    /**
+     * 列表使用
+     * @return
+     */
+    @Override
+    public List<Permission> getAllPermissions() {
+        return permissionDao.getAllPermissions();
+    }
+
+
 }

@@ -31,4 +31,35 @@
         <include refid="Columns"></include>
         <where>id=#{id}</where>
     </select>
+
+    <select id="findAllAdmins" resultMap="AdminMap">
+        <include refid="Columns"></include>
+        <where>
+            <if test="id!=null">
+                and id=#{id}
+            </if>
+            <if test="nameLike!=null and nameLike!=''">
+                <bind value="'%'+nameLike+'%'" name="nameLikes"></bind>
+                and name like #{nameLikes}
+            </if>
+        </where>
+    </select>
+    <delete id="deleteAdminByIds" flushCache="true">
+        delete from admin_group where id in
+        <foreach collection="ids" separator="," open="(" close=")" item="id">#{id}</foreach>
+    </delete>
+    <insert id="insertAdmin" useGeneratedKeys="true" keyColumn="id" keyProperty="id" flushCache="true">
+        insert into admin(phone,password,name) values (#{phone},#{password},#{name})
+    </insert>
+    <update id="updateAdmin" flushCache="true">
+        update admin set name=#{name},phone=#{phone},password=#{password} where id=#{id}
+    </update>
+
+    <delete id="deleteGroup4Admin" flushCache="true">
+        delete from admin_admin_group where admin_id=#{aid}
+    </delete>
+    <insert id="insertGroup4Admin" flushCache="true">
+        insert into admin_admin_group(admin_id, group_id)
+        values(#{aid},#{gid})
+    </insert>
 </mapper>

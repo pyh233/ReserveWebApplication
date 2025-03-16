@@ -7,7 +7,7 @@ import com.github.pagehelper.Page;
 import java.util.List;
 
 public interface RouteService {
-    public List<Route> getRoutes(RouteSearchModel routeSearchModel, Page<?> page);
+    public List<Route> findAllRoutes(RouteSearchModel routeSearchModel, Page<?> page);
     public int deleteRouteByIds(Integer[] ids);
     public boolean addRoute(Route route);
     public boolean updateRoute(Route route);

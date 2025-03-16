@@ -21,6 +21,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.lang.reflect.Method;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 @Configuration
 @EnableCaching
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
+@EnableTransactionManagement
 public class RedisConfig implements WebMvcConfigurer {
 
     @Bean("myKeyGenerator")

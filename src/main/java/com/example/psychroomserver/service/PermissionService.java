@@ -14,7 +14,10 @@ public interface PermissionService {
      */
     public List<Permission> findAll();
 
-    public List<Permission> getPermissions(PermissionSearchModel permissionSearchModel, Page<?> page);
+    public List<Permission> findAllPermissions(PermissionSearchModel permissionSearchModel, Page<?> page);
     public int deletePermissionByIds(Integer[] ids);
     public boolean addPermission(Permission permission);
+    public boolean renewRoutes4Permission(Integer pid,Integer[] rids);
+
+    public List<Permission> getAllPermissions();
 }

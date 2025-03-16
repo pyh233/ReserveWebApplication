@@ -47,4 +47,19 @@
     <insert id="addPermission" flushCache="true" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         insert into admin_permission(name) values (#{name})
     </insert>
+
+
+    <delete id="deleteAllRoute4Permission" flushCache="true">
+        delete
+        from admin_route_permission
+        where permission_id = #{pid}
+    </delete>
+    <insert id="addLatestRoute4Permission" useGeneratedKeys="true" flushCache="true">
+        insert into admin_route_permission(permission_id,route_id) values (#{pid},#{rid})
+    </insert>
+
+
+    <select id="getAllPermissions" resultType="Permission" useCache="true">
+        <include refid="Columns"></include>
+    </select>
 </mapper>

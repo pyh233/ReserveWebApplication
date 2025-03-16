@@ -20,4 +20,38 @@
         <include refid="Columns"/>
         where id in (select role_id from admin_group_role where group_id=#{gid})
     </select>
+
+
+    <select id="findAllRoles" resultMap="RoleMap">
+        <include refid="Columns"></include>
+        <where>
+            <if test="id!=null">
+                and id=#{id}
+            </if>
+            <if test="nameLike!=null and nameLike!=''">
+                <bind value="'%'+nameLike+'%'" name="nameLikes"></bind>
+                and name like #{nameLikes}
+            </if>
+        </where>
+    </select>
+    <delete id="deleteRoleByIds" flushCache="true">
+        delete from admin_role where id in
+        <foreach collection="ids" separator="," open="(" close=")" item="id">#{id}</foreach>
+    </delete>
+    <insert id="insertRole" flushCache="true" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into admin_role(name) values (#{name})
+    </insert>
+
+
+    <delete id="deleteAllPermission4Role" flushCache="true">
+        delete from admin_role_permission where role_id=#{roleId}
+    </delete>
+    <insert id="insertNewPermission4Role" flushCache="true">
+        insert into admin_role_permission(role_id, permission_id)
+        values (#{roleId}, #{permissionId})
+    </insert>
+
+    <select id="getAllRoles" resultType="Role" useCache="true">
+        <include refid="Columns"></include>
+    </select>
 </mapper>

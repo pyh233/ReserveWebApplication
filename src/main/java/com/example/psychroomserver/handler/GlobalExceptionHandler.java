@@ -19,6 +19,10 @@ public class GlobalExceptionHandler {
     // 数据库约束限制添加权限异常
     @ExceptionHandler(SQLException.class)
     public ResponseEntity<JsonResult> sql(SQLException e) {
-        return ResponseEntity.internalServerError().body(JsonResult.fail(e.getMessage()));
+        return ResponseEntity.internalServerError().body(JsonResult.fail("请检查您的数据后重新提交"));
     }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<JsonResult> exception(Exception e) {
+//        return ResponseEntity.internalServerError().body(JsonResult.fail("发生了未知错误"));
+//    }
 }
