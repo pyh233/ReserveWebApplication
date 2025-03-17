@@ -1,0 +1,3 @@
+<template>
+    Expert Course
+</template>
