@@ -7,6 +7,7 @@ import com.example.psychroomserver.service.RoleService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,12 @@ import java.util.List;
 @Service
 public class RoleServiceImpl implements RoleService {
     private RoleDao roleDao;
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     @Autowired
     public void setRoleDao(RoleDao roleDao) {
@@ -45,14 +52,16 @@ public class RoleServiceImpl implements RoleService {
     public boolean renewPermission4Role(Integer rid, Integer[] ids) {
         roleDao.deleteAllPermission4Role(rid);
 
-        for(Integer id : ids) {
-            roleDao.insertNewPermission4Role(rid,id);
+        for (Integer id : ids) {
+            roleDao.insertNewPermission4Role(rid, id);
         }
+        redisTemplate.delete("com.example.psychroomserver.dao.PermissionDao");
         return true;
     }
 
     /**
      * 列表使用，为Group提供服务
+     *
      * @return
      */
     @Override

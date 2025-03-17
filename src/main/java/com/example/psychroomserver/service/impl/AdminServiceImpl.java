@@ -13,6 +13,7 @@ import com.github.pagehelper.PageHelper;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,10 +42,12 @@ public class AdminServiceImpl implements AdminService {
         this.adminDao = adminDao;
     }
 
+
     /**
      * 根据账号查询用户，登陆时调用
      * 只有用户信息
      * NOTE:个人不理解这个地方加缓存的作用。
+     *
      * @param phone
      * @return
      */
@@ -52,6 +55,7 @@ public class AdminServiceImpl implements AdminService {
     @Cacheable(keyGenerator = "myKeyGenerator")
     public ResponseEntity<JsonResult> loginAdmin(Admin loginAdmin) {
         // 验证码验证
+        redisTemplate.getConnectionFactory().getConnection().select(0);
         String captcha = (String) redisTemplate.opsForValue().get("captcha-" + loginAdmin.getCaptchaCode());
         if (!loginAdmin.getCaptcha().equalsIgnoreCase(captcha)) {
             return ResponseEntity.ok(JsonResult.fail("验证码错误"));
@@ -87,6 +91,7 @@ public class AdminServiceImpl implements AdminService {
      * 根据id查询用户权限链
      * NOTE:用户身份变更需要清除这个地方的缓存
      * NOTE:身份变更调用renewGroup加注解清除缓存
+     *
      * @param id
      * @return
      */
@@ -114,7 +119,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public boolean updateAdmin(Admin admin) {
         Admin adminInDB = adminDao.findAdminById(admin.getId());
-        if(!admin.getPassword().equals("")) {
+        if (!admin.getPassword().equals("")) {
             admin.setPassword(pe.encryptPassword(admin.getPassword()));
         }
         return adminDao.updateAdmin(admin) > 0;
@@ -135,6 +140,8 @@ public class AdminServiceImpl implements AdminService {
         for (Integer id : ids) {
             adminDao.insertGroup4Admin(aid, id);
         }
+        // 3.前两个步骤已经把adminDao缓存删除，接下来要做的是删除GroupDao的缓存
+        redisTemplate.delete("com.example.psychroomserver.dao.GroupDao");
         return true;
     }
 

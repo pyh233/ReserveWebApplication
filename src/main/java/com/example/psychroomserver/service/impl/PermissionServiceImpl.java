@@ -7,6 +7,7 @@ import com.example.psychroomserver.service.PermissionService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,12 @@ import java.util.List;
 @Service
 public class PermissionServiceImpl implements PermissionService {
     private PermissionDao permissionDao;
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     @Autowired
     public void setPermissionDao(PermissionDao permissionDao) {
@@ -66,11 +73,13 @@ public class PermissionServiceImpl implements PermissionService {
             permissionDao.addLatestRoute4Permission(pid, rid);
         }
         //3.todo:flush cache
+        redisTemplate.delete("com.example.psychroomserver.dao.RouteDao");
         return true;
     }
 
     /**
      * 列表使用
+     *
      * @return
      */
     @Override

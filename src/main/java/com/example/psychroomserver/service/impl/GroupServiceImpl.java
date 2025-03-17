@@ -8,6 +8,7 @@ import com.example.psychroomserver.service.GroupService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,11 +16,17 @@ import java.util.List;
 
 @Service
 public class GroupServiceImpl implements GroupService {
-    GroupDao groupDao;
+    private GroupDao groupDao;
+    private RedisTemplate redisTemplate;
 
     @Autowired
     public void setGroupDao(GroupDao groupDao) {
         this.groupDao = groupDao;
+    }
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -51,6 +58,7 @@ public class GroupServiceImpl implements GroupService {
         for (Integer id : ids) {
             groupDao.insertNewRoles4Group(groupId, id);
         }
+        redisTemplate.delete("com.example.psychroomserver.dao.RoleDao");
         return true;
     }
 

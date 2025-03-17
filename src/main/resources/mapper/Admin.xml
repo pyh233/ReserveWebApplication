@@ -55,6 +55,9 @@
         update admin set name=#{name},phone=#{phone},password=#{password} where id=#{id}
     </update>
 
+    <!--NOTE:只删除admin,级联查询首先调用Group的方法从缓存中获取原先的数据-->
+    <!--NOTE:如果只删除group缓存，还是从admin缓存拿数据-->
+    <!--NOTE:如何做到-->
     <delete id="deleteGroup4Admin" flushCache="true">
         delete from admin_admin_group where admin_id=#{aid}
     </delete>
