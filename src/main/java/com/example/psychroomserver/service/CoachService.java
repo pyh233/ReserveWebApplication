@@ -11,4 +11,6 @@ public interface CoachService {
     int deleteCoachByIds(Integer[] ids);
     boolean addCoach(Coach coach);
     boolean updateCoach(Coach coach);
+
+    List<Coach> getCoachList();
 }

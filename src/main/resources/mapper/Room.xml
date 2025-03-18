@@ -44,4 +44,11 @@
         </set>
         where id=#{id}
     </update>
+    <select id="findRoomById" useCache="true" resultType="Room">
+        <include refid="Columns"></include>
+        where id=#{id}
+    </select>
+    <select id="getRoomList" useCache="true" resultType="Room">
+        <include refid="Columns"></include>
+    </select>
 </mapper>

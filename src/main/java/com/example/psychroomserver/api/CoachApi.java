@@ -67,4 +67,8 @@ public class CoachApi {
             return ResponseEntity.ok(JsonResult.fail("修改失败"));
         }
     }
+    @GetMapping("/list")
+    public ResponseEntity<JsonResult> getCoaches() {
+        return ResponseEntity.ok(JsonResult.success("sc",coachService.getCoachList()));
+    }
 }

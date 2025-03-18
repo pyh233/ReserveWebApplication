@@ -15,7 +15,7 @@ import java.time.Duration;
 import java.util.UUID;
 
 @Controller
-@RequestMapping(value = "/static",produces = MediaType.IMAGE_PNG_VALUE)
+@RequestMapping(value = "/static",produces = {MediaType.IMAGE_PNG_VALUE,MediaType.IMAGE_JPEG_VALUE,MediaType.IMAGE_GIF_VALUE})
 public class ImageLoaderController {
     @Value("${custom.img.upload.location}")
     private String uploadLocation;

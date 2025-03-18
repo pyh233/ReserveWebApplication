@@ -11,4 +11,7 @@ public interface RoomService {
     public int deleteRoom(Integer[] ids);
     public boolean addRoom(Room room);
     public boolean updateRoom(Room room);
+
+
+    public List<Room> getRoomList();
 }

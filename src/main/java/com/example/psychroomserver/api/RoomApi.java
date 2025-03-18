@@ -7,13 +7,14 @@ import com.example.psychroomserver.util.JsonResult;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/room")
+@RequestMapping(value = "/api/v1/room",produces = MediaType.APPLICATION_JSON_VALUE)
 public class RoomApi {
     RoomService roomService;
 
@@ -68,5 +69,9 @@ public class RoomApi {
         } else {
             return ResponseEntity.ok(JsonResult.fail("修改失败"));
         }
+    }
+    @GetMapping("/list")
+    public ResponseEntity<JsonResult> getRooms() {
+        return ResponseEntity.ok(JsonResult.success("sc",roomService.getRoomList()));
     }
 }

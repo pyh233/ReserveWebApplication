@@ -11,7 +11,15 @@
                name, time, length, photo, coach_id, room_id
         from course
     </sql>
-    <select id="getCourse" resultType="Course" useCache="true">
+    <resultMap id="CourseMap" type="Course">
+        <result column="coach_id" property="coachId"/>
+        <result column="room_id" property="roomId"/>
+        <association column="coach_id" property="coach"
+                     select="com.example.psychroomserver.dao.CoachDao.findCoachById"/>
+        <association column="room_id" property="room"
+                     select="com.example.psychroomserver.dao.RoomDao.findRoomById"/>
+    </resultMap>
+    <select id="getCourse" resultMap="CourseMap" useCache="true">
         <include refid="Columns"></include>
         <where>
             <if test="id!=null">
@@ -24,8 +32,8 @@
         </where>
     </select>
     <insert id="addCourse" useGeneratedKeys="true" keyColumn="id" keyProperty="id" flushCache="true">
-        insert into course(name,time,length,photo,coach_id,room_id)
-        values (#{name}, #{time}, #{length}, #{photo}, #{coachId},#{roomId})
+        insert into course(name, time, length, photo, coach_id, room_id)
+        values (#{name}, #{time}, #{length}, #{photo}, #{coachId}, #{roomId})
     </insert>
     <delete id="deleteCourseByIds" flushCache="true">
         delete from course where id in

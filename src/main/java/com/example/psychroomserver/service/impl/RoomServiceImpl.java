@@ -48,4 +48,12 @@ public class RoomServiceImpl implements RoomService {
     public boolean updateRoom(Room room) {
         return roomDao.updateRoom(room) > 0;
     }
+
+    @Override
+    @Cacheable(keyGenerator = "myKeyGenerator")
+    public List<Room> getRoomList() {
+        return roomDao.getRoomList();
+    }
+
+
 }

@@ -12,4 +12,7 @@ public interface CoachDao {
     int deleteCoachByIds(Integer[] ids);
     int insertCoach(Coach coach);
     int updateCoach(Coach coach);
+
+    Coach findCoachById(Integer id);
+    List<Coach> getCoachList();
 }

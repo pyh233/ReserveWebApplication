@@ -55,7 +55,7 @@ public class AdminServiceImpl implements AdminService {
     @Cacheable(keyGenerator = "myKeyGenerator")
     public ResponseEntity<JsonResult> loginAdmin(Admin loginAdmin) {
         // 验证码验证
-        redisTemplate.getConnectionFactory().getConnection().select(0);
+//        redisTemplate.getConnectionFactory().getConnection().select(0);
         String captcha = (String) redisTemplate.opsForValue().get("captcha-" + loginAdmin.getCaptchaCode());
         if (!loginAdmin.getCaptcha().equalsIgnoreCase(captcha)) {
             return ResponseEntity.ok(JsonResult.fail("验证码错误"));

@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,5 +51,11 @@ public class CoachServiceImpl implements CoachService {
     @CacheEvict(allEntries = true)
     public boolean updateCoach(Coach coach) {
         return coachDao.updateCoach(coach) > 0;
+    }
+
+    @Override
+    @Cacheable(keyGenerator = "myKeyGenerator")
+    public List<Coach> getCoachList() {
+        return coachDao.getCoachList();
     }
 }

@@ -12,4 +12,7 @@ public interface RoomDao {
     public int deleteRoomByIds(Integer[] ids);
     public int addRoom(Room room);
     public int updateRoom(Room room);
+
+    public Room findRoomById(Integer id);
+    public List<Room> getRoomList();
 }
