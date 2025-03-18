@@ -25,7 +25,7 @@ function save(course) {
     let resp = axiosInstance({
         url,
         method: "post",
-        data:course
+        data: course
     });
     return resp;
 }
@@ -33,8 +33,22 @@ function update(course) {
     let resp = axiosInstance({
         url,
         method: "put",
-        data:course
+        data: course
     });
     return resp;
 }
-export { findAll, deleteCourseRequest, save,update }
+function getCoachsList() {
+    let resp = axiosInstance({
+        url: "/coach/list",
+        method: "get"
+    });
+    return resp;
+}
+function getRoomsList() {
+    let resp = axiosInstance({
+        url: "/room/list",
+        method: "get"
+    });
+    return resp;
+}
+export { findAll, deleteCourseRequest, save, update,getCoachsList,getRoomsList }

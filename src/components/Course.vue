@@ -54,9 +54,51 @@
       <el-table-column prop="name" label="课程名称" width="140" />
       <el-table-column prop="time" label="开始时间" width="170" />
       <el-table-column prop="length" label="课时" width="140" />
-      <el-table-column prop="photo" label="照片"/>
-      <el-table-column prop="coachId" label="教练" />
-      <el-table-column prop="roomId" label="房间" />
+      <el-table-column prop="photo" label="照片">
+        <template #default="scope">
+          <el-image
+            :key="'/static' + scope.row.photo"
+            :src="'/static' + scope.row.photo"
+            lazy
+            class="elimagesize"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column prop="coachId" label="教练">
+        <template #default="scope">
+          <el-popover
+            effect="light"
+            trigger="hover"
+            placement="top"
+            width="auto"
+          >
+            <template #default>
+              <div>wechat: {{ scope.row.coach.wechat }}</div>
+              <div>phone: {{ scope.row.coach.phone }}</div>
+            </template>
+            <template #reference>
+              <el-tag>{{ scope.row.coach.name }}</el-tag>
+            </template>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column prop="roomId" label="房间">
+        <template #default="scope">
+          <el-popover
+            effect="light"
+            trigger="hover"
+            placement="top"
+            width="auto"
+          >
+            <template #default>
+              <div>maxCount: {{ scope.row.room.maxCount }}</div>
+            </template>
+            <template #reference>
+              <el-tag>{{ scope.row.room.name }}</el-tag>
+            </template>
+          </el-popover>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页条组件 -->
     <el-pagination
@@ -93,10 +135,10 @@
       </el-form-item>
       <el-form-item label="time" prop="time">
         <el-date-picker
-        v-model="formModel.time"
-        type="datetime"
-        placeholder="请选择时间"
-      />
+          v-model="formModel.time"
+          type="datetime"
+          placeholder="请选择时间"
+        />
       </el-form-item>
       <el-form-item label="length" prop="length">
         <el-input
@@ -106,25 +148,48 @@
         />
       </el-form-item>
       <el-form-item label="photo" prop="photo">
-        <el-input
-          v-model="formModel.photo"
-          placeholder="请输入照片"
-          autocomplete="off"
-        />
+        <el-upload
+          class="avatar-uploader"
+          action="/static/image/upload/course"
+          name="file"
+          method="post"
+          :show-file-list="false"
+          :on-success="handleAvatarSuccess"
+          :before-upload="beforeAvatarUpload"
+        >
+          <img v-if="imgAvatarUrl" :src="imgAvatarUrl" class="avatar" />
+          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+        </el-upload>
       </el-form-item>
       <el-form-item label="coachId" prop="coachId">
-        <el-input
+        <el-select
           v-model="formModel.coachId"
-          placeholder="请输入jl"
-          autocomplete="off"
-        />
+          placeholder="Select"
+          size="large"
+          style="width: 240px"
+        >
+          <el-option
+            v-for="item in coachs"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="roomId" prop="roomId">
-        <el-input
+        <el-select
           v-model="formModel.roomId"
-          placeholder="请输入fj"
-          autocomplete="off"
-        />
+          placeholder="Select"
+          size="large"
+          style="width: 240px"
+        >
+          <el-option
+            v-for="item in rooms"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -144,8 +209,34 @@
 .pi {
   margin-top: 15px;
 }
+.avatar-uploader .avatar {
+  width: 300px;
+  height: 300px;
+  display: block;
+}
 </style>
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
 
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+</style>
 <script setup>
 import { ref, reactive, onMounted, toRaw } from "vue";
 import {
@@ -155,10 +246,33 @@ import {
   CirclePlusFilled,
   Refresh,
 } from "@element-plus/icons-vue";
-import { findAll, deleteCourseRequest, save, update } from "@/api/CourseApi";
+import {
+  findAll,
+  deleteCourseRequest,
+  save,
+  update,
+  getCoachsList,
+  getRoomsList,
+} from "@/api/CourseApi";
+import { deleteImg } from "@/api/DeleteApi";
 import { ElMessage, ElMessageBox } from "element-plus";
 import lodash from "lodash";
 const loading = ref(true);
+
+let imgAvatarUrl = ref("");
+
+// 图片上传
+function beforeAvatarUpload(rawFile) {
+  if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error("图片最大为2MB!");
+    return false;
+  }
+  return true;
+}
+
+function handleAvatarSuccess(resp) {
+  imgAvatarUrl.value = "/static" + resp.data;
+}
 //分页数据
 let pi = ref({
   page: 1,
@@ -258,10 +372,16 @@ function diaglogClose() {
   Object.assign(formModel, {
     id: "",
     name: "",
-    phone: "",
-    password: "",
-    isDel: true,
+    time: "",
+    length: "",
+    photo: "",
+    coachId: "",
+    roomId: ""
   });
+  // NOTE:删除照片
+  // imgAvatarUrl.value = imgAvatarUrl.value.replace("/static", "");
+  // deleteImg(imgAvatarUrl.value);
+  // imgAvatarUrl.value = "";
 }
 
 // 对话框设置
@@ -272,17 +392,28 @@ let formModel = reactive({
   name: "",
   time: "",
   length: "",
-  photo:"",
+  photo: "",
 
-  coachId:"",
-  roomId:""
+  coachId: "",
+  roomId: "",
 });
 // 添显示加对话框
 function addCourseClick() {
   dialogFormVisible.value = true;
   dialogTitle.value = "Add Course";
 }
-
+// 请求rooms
+let rooms = ref();
+async function getRooms() {
+  let resp = await getRoomsList();
+  rooms.value = resp.data;
+}
+// 请求coachs
+let coachs = ref();
+async function getCoachs() {
+  let resp = await getCoachsList();
+  coachs.value = resp.data;
+}
 // 修改对话框
 function editCourseClick() {
   let rows = tableRef.value.getSelectionRows();
@@ -297,8 +428,11 @@ function editCourseClick() {
       message: "请选择要修改的行",
     });
   } else {
-    let cloneFromModel = lodash.cloneDeep(rows[0]);
-    Object.assign(formModel, cloneFromModel);
+    getCoachs();
+    getRooms();
+    Object.assign(formModel, lodash.cloneDeep(rows[0]));
+    // NOTE:1.这是第一步
+    imgAvatarUrl.value = "/static" + formModel.photo;
     dialogFormVisible.value = true;
     dialogTitle.value = "Edit Course";
   }
@@ -322,10 +456,12 @@ const rules = {
 async function doSubmit() {
   auformRef.value.validate(async (valid) => {
     if (valid) {
+      formModel.photo = imgAvatarUrl.value.replace("/static", "");
       let course = toRaw(formModel);
       if (course.id && course.id !== "") {
         let resp = await update(course);
         if (resp.success) {
+          imgAvatarUrl.value = "";
           ElMessage({
             type: "success",
             message: resp.message,

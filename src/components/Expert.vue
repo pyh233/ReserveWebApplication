@@ -65,12 +65,15 @@
         :show-overflow-tooltip="true"
         :tooltip-formatter="recommFunc"
       />
-      <el-table-column prop="photo" label="导师图片" width="100"> 
+      <el-table-column prop="photo" label="导师图片" width="100">
         <template #default="scope">
-            <el-image :key="'/static'+scope.row.photo" :src="'/static'+scope.row.photo" lazy
-              class="elimagesize" />
-          
-      </template>
+          <el-image
+            :key="'/static' + scope.row.photo"
+            :src="'/static' + scope.row.photo"
+            lazy
+            class="elimagesize"
+          />
+        </template>
       </el-table-column>
     </el-table>
     <!-- 分页条组件 -->
@@ -128,11 +131,18 @@
         />
       </el-form-item>
       <el-form-item label="photo" prop="photo">
-        <el-input
-          v-model="formModel.photo"
-          placeholder="请输入照片"
-          autocomplete="off"
-        />
+        <el-upload
+          class="avatar-uploader"
+          action="/static/image/upload/coach"
+          name="file"
+          method="post"
+          :show-file-list="false"
+          :on-success="handleAvatarSuccess"
+          :before-upload="beforeAvatarUpload"
+        >
+          <img v-if="imgAvatarUrl" :src="imgAvatarUrl" class="avatar" />
+          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+        </el-upload>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -151,12 +161,38 @@
 .pi {
   margin-top: 15px;
 }
-.elimagesize{
-  width:50px;
+.elimagesize {
+  width: 50px;
   height: 50px;
 }
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
 </style>
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
 
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+</style>
 <script setup>
 import { ref, reactive, onMounted, toRaw } from "vue";
 import {
@@ -165,10 +201,29 @@ import {
   Delete,
   CirclePlusFilled,
   Refresh,
+  Plus,
 } from "@element-plus/icons-vue";
 import { findAll, deleteCoachRequest, save, update } from "@/api/CoachApi";
+import { deleteImg } from "@/api/DeleteApi";
 import { ElMessage, ElMessageBox } from "element-plus";
 import lodash from "lodash";
+
+let imgAvatarUrl = ref("");
+
+// 图片上传
+function beforeAvatarUpload(rawFile) {
+  if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error("图片最大为2MB!");
+    return false;
+  }
+  return true;
+}
+
+function handleAvatarSuccess(resp) {
+  imgAvatarUrl.value = "/static" + resp.data;
+}
+// 导师寄语
+function recommFunc() {}
 
 const loading = ref(true);
 //搜索表单数据模型
@@ -268,7 +323,18 @@ async function deleteCoachs(ids) {
 let auformRef = ref();
 function diaglogClose() {
   auformRef.value.resetFields();
-  Object.assign(formModel, { id: "", name: "", phone: "", wechat: "", recomm: "", photo: "" });
+  Object.assign(formModel, {
+    id: "",
+    name: "",
+    phone: "",
+    wechat: "",
+    recomm: "",
+    photo: "",
+  });
+  // NOTE:删除照片
+  // imgAvatarUrl.value = imgAvatarUrl.value.replace("/static", "");
+  // deleteImg(imgAvatarUrl.value);
+  // imgAvatarUrl.value = "";
 }
 
 // 对话框设置
@@ -302,9 +368,10 @@ function editCoachClick() {
       message: "请选择要修改的行",
     });
   } else {
-    let cloneFromModel = lodash.cloneDeep(rows[0]);
     // 不可以直接把cloneFromModel包装成响应式赋值，这样会创建新的响应式对象，原来绑定的就会失效
-    Object.assign(formModel, cloneFromModel);
+    Object.assign(formModel, lodash.cloneDeep(rows[0]));
+    // NOTE:1.这是第一步
+    imgAvatarUrl.value = "/static" + formModel.photo;
     dialogFormVisible.value = true;
     dialogTitle.value = "Edit Coach";
   }
@@ -328,10 +395,14 @@ const rules = {
 async function doSubmit() {
   auformRef.value.validate(async (valid) => {
     if (valid) {
+      // NOTE:头像修改
+      formModel.photo = imgAvatarUrl.value.replace("/static", "");
       let coach = toRaw(formModel);
       if (coach.id && coach.id !== "") {
         let resp = await update(coach);
         if (resp.success) {
+          // NOTE:如果照片更新成功应该删除原来的照片
+          imgAvatarUrl.value = '';
           ElMessage({
             type: "success",
             message: resp.message,
